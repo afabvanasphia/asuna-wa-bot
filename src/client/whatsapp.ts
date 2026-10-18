@@ -17,6 +17,11 @@ import { logger } from '../utils/logger.js';
 import { store } from '../storage/store.js';
 import { messageHandler } from '../handlers/messageHandler.js';
 import fs from 'fs';
+import QRCode from 'qrcode';
+
+export let latestQrDataUrl: string | null = null;
+export let latestPairingCode: string | null = null;
+export let isConnectedToWhatsApp: boolean = false;
 
 export class WhatsAppClient {
   public socket: WASocket | null = null;
@@ -56,12 +61,22 @@ export class WhatsAppClient {
       sock.ev.on('connection.update', async update => {
         const { connection, lastDisconnect, qr } = update;
 
-        // Saat WhatsApp siap (menghasilkan QR), segera minta Pairing Code 8 Karakter
+        // Jika WhatsApp menghasilkan QR, simpan DataURL gambar QR
+        if (qr) {
+          try {
+            latestQrDataUrl = await QRCode.toDataURL(qr, { scale: 8, margin: 2 });
+          } catch (e) {
+            logger.error({ e }, 'Gagal mengonversi QR ke DataURL');
+          }
+        }
+
+        // Saat WhatsApp siap, minta Pairing Code 8 Karakter
         if (qr && !sock.authState.creds.registered && !pairingCodeRequested) {
           pairingCodeRequested = true;
           const botPhone = (config.botPhoneNumber || '628211312197').replace(/[^0-9]/g, '');
           try {
             const code = await sock.requestPairingCode(botPhone);
+            latestPairingCode = code;
             console.log('\n============================================================');
             console.log(`  🔥 KODE PAIRING WHATSAPP:  >>> ${code} <<<`);
             console.log('============================================================');
@@ -78,6 +93,7 @@ export class WhatsAppClient {
         }
 
         if (connection === 'close') {
+          isConnectedToWhatsApp = false;
           const shouldReconnect =
             (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
           logger.warn(
@@ -92,6 +108,9 @@ export class WhatsAppClient {
           }
         } else if (connection === 'open') {
           this.isConnecting = false;
+          isConnectedToWhatsApp = true;
+          latestQrDataUrl = null;
+          latestPairingCode = null;
           logger.info('🎉 Berhasil terhubung ke WhatsApp!');
 
           // Deteksi profil bot & mode operasi (Self-Assistant vs Dedicated Bot)

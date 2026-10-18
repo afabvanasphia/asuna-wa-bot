@@ -10,6 +10,7 @@ import { whatsappClient } from './client/whatsapp.js';
 import { unreadTrackerService } from './services/unreadTracker.js';
 import { mentionWatcherService } from './services/mentionWatcher.js';
 import { store } from './storage/store.js';
+import { startWebServer } from './server.js';
 
 async function bootstrap() {
   console.log(`
@@ -30,6 +31,9 @@ async function bootstrap() {
   if (!config.ownerPhoneNumber) {
     logger.warn('⚠️ OWNER_PHONE_NUMBER belum diisi di .env! Asisten tidak tahu nomor siapa yang harus diberi notifikasi.');
   }
+
+  // 0. Jalankan Web Server untuk menampilkan QR Code & Pairing Code di Browser
+  startWebServer();
 
   // 1. Inisialisasi Klien WhatsApp
   await whatsappClient.start();
