@@ -41,6 +41,7 @@ export const config: AppConfig = {
   ownerJid,
   ownerLid: process.env.OWNER_LID || '49151723208777',
   assistantName: process.env.ASSISTANT_NAME || 'Asuna',
+  botPhoneNumber: (process.env.BOT_PHONE_NUMBER || '628211312197').replace(/[^0-9]/g, ''),
   timezone: process.env.USER_TIMEZONE || 'Asia/Jakarta',
   digestHours: digestHours.length > 0 ? digestHours : [8, 12, 18, 21],
   mentionSnoozeHours: parseInt(process.env.MENTION_SNOOZE_HOURS || '2', 10),
