@@ -3,7 +3,7 @@ import { latestQrDataUrl, latestPairingCode, isConnectedToWhatsApp } from './cli
 import { logger } from './utils/logger.js';
 
 export function startWebServer() {
-  const port = process.env.PORT || 3000;
+  const port = parseInt(process.env.PORT || '3000', 10);
   
   const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -92,7 +92,7 @@ export function startWebServer() {
     `);
   });
 
-  server.listen(port, () => {
-    logger.info({ port }, `🌐 Web server QR & Pairing aktif di port ${port}`);
+  server.listen(port, '0.0.0.0', () => {
+    logger.info({ port }, `🌐 Web server QR & Pairing aktif di port ${port} (0.0.0.0)`);
   });
 }

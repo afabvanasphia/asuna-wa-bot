@@ -14,5 +14,7 @@ COPY src/ ./src/
 # Compile TypeScript to JavaScript
 RUN npm run build
 
+EXPOSE 3000
+
 # Start bot
 CMD ["npm", "start"]
