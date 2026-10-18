@@ -50,38 +50,31 @@ export class WhatsAppClient {
       this.socket = sock;
       messageHandler.setClient(this);
 
-      // Otomatis minta Pairing Code jika belum terdaftar (sangat cocok untuk Cloud/Railway)
-      if (!sock.authState.creds.registered) {
-        const botPhone = (config.botPhoneNumber || '628211312197').replace(/[^0-9]/g, '');
-        if (botPhone) {
-          setTimeout(async () => {
-            try {
-              const code = await sock.requestPairingCode(botPhone);
-              console.log('\n============================================================');
-              console.log(`  🔥 KODE PAIRING WHATSAPP:  >>> ${code} <<<`);
-              console.log('============================================================');
-              console.log(`  Nomor HP Bot: +${botPhone}`);
-              console.log('  Langkah mudah menghubungkan di HP bot:');
-              console.log('  1. Buka WA di HP bot > Perangkat Tertaut > Tautkan Perangkat');
-              console.log('  2. Klik teks di bawah: "Tautkan dengan nomor telepon saja"');
-              console.log(`  3. Masukkan 8 karakter kode ini: ${code}`);
-              console.log('============================================================\n');
-            } catch (err) {
-              logger.error({ err }, 'Gagal meminta pairing code');
-            }
-          }, 3000);
-        }
-      }
+      let pairingCodeRequested = false;
 
-      // Handle QR code and Connection Updates
+      // Handle QR code, Pairing Code and Connection Updates
       sock.ev.on('connection.update', async update => {
         const { connection, lastDisconnect, qr } = update;
 
-        if (qr && (!config.botPhoneNumber || sock.authState.creds.registered)) {
-          console.log('\n============================================================');
-          console.log('  SCAN QR CODE DI BAWAH INI DENGAN WHATSAPP ANDA:');
-          console.log('============================================================\n');
-          qrcode.generate(qr, { small: true });
+        // Saat WhatsApp siap (menghasilkan QR), segera minta Pairing Code 8 Karakter
+        if (qr && !sock.authState.creds.registered && !pairingCodeRequested) {
+          pairingCodeRequested = true;
+          const botPhone = (config.botPhoneNumber || '628211312197').replace(/[^0-9]/g, '');
+          try {
+            const code = await sock.requestPairingCode(botPhone);
+            console.log('\n============================================================');
+            console.log(`  🔥 KODE PAIRING WHATSAPP:  >>> ${code} <<<`);
+            console.log('============================================================');
+            console.log(`  Nomor HP Bot: +${botPhone}`);
+            console.log('  Langkah mudah di WhatsApp HP bot:');
+            console.log('  1. Buka WA di HP bot > Titik 3 > Perangkat Tertaut > Tautkan');
+            console.log('  2. Klik teks di bawah: "Tautkan dengan nomor telepon saja"');
+            console.log(`  3. Masukkan 8 karakter kode ini: ${code}`);
+            console.log('============================================================\n');
+          } catch (err) {
+            logger.error({ err }, 'Gagal meminta pairing code');
+            pairingCodeRequested = false;
+          }
         }
 
         if (connection === 'close') {
