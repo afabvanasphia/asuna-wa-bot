@@ -1,0 +1,12 @@
+services:
+  asuna-bot:
+    build: .
+    container_name: asuna-wa-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./auth_info_baileys:/app/auth_info_baileys
+      - ./data:/app/data
+    environment:
+      - TZ=Asia/Jakarta
