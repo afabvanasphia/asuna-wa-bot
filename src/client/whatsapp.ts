@@ -17,6 +17,7 @@ import { logger } from '../utils/logger.js';
 import { store } from '../storage/store.js';
 import { messageHandler } from '../handlers/messageHandler.js';
 import fs from 'fs';
+import path from 'path';
 import QRCode from 'qrcode';
 
 export let latestQrDataUrl: string | null = null;
@@ -33,6 +34,16 @@ export class WhatsAppClient {
     this.isConnecting = true;
 
     try {
+      // Otomatis pulihkan sesi login jika SESSION_CREDS disediakan di environment variable
+      if (process.env.SESSION_CREDS) {
+        fs.mkdirSync(config.authFolder, { recursive: true });
+        const credsPath = path.join(config.authFolder, 'creds.json');
+        if (!fs.existsSync(credsPath)) {
+          logger.info('Mengekstrak sesi WhatsApp dari variabel SESSION_CREDS...');
+          fs.writeFileSync(credsPath, process.env.SESSION_CREDS.trim(), 'utf-8');
+        }
+      }
+
       const { state, saveCreds } = await useMultiFileAuthState(config.authFolder);
       const { version, isLatest } = await fetchLatestBaileysVersion();
       logger.info({ version, isLatest }, 'Memulai koneksi WhatsApp Multi-Device...');
