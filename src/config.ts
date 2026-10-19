@@ -25,8 +25,8 @@ export interface AppConfig {
   avatarPath: string;
 }
 
-const rawOwnerNumber = (process.env.OWNER_PHONE_NUMBER || '').replace(/[^0-9]/g, '');
-const ownerJid = rawOwnerNumber ? `${rawOwnerNumber}@s.whatsapp.net` : '';
+const rawOwnerNumber = (process.env.OWNER_PHONE_NUMBER || '6281335238814').replace(/[^0-9]/g, '');
+const ownerJid = `${rawOwnerNumber}@s.whatsapp.net`;
 
 const rawDigestHours = process.env.DIGEST_HOURS || '8,12,18,21';
 const digestHours = rawDigestHours
